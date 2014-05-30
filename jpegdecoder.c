@@ -25,8 +25,6 @@
 
 /*#define DEBUG_BOUNDS_CHECK*/
 
-static const float pi = 3.14159265358979;
-
 typedef struct JPEGComponent_t {
 	unsigned sub_x, sub_y, qt, ht;
 } JPEGComponent;
@@ -177,7 +175,7 @@ static void parse_sof(JPEGDecoder *j)
 }
 
 #ifdef USE_FAST_IDCT
-static void scale_qt_for_fast_idct(float *qt) {
+static void scale_qt_for_fast_idct(int *qt) {
 	uint_fast8_t x, y;
 	static const float scale_factor[8] = {
 		1.0f, 1.387039845f, 1.306562965f, 1.175875602f,
@@ -186,7 +184,7 @@ static void scale_qt_for_fast_idct(float *qt) {
 
 	for (y=0; y<8; y++) {
 		for (x=0; x<8; x++) {
-			*qt = *((int *)qt) * scale_factor[x] * scale_factor[y];
+			*qt *= scale_factor[x] * scale_factor[y];
 			qt++;
 		}
 	}
@@ -293,7 +291,7 @@ static int IDCT_fast_out(int x)
 	return x;
 }
 
-static void IDCT(const int *input, uint8_t *output, float *qt)
+static void IDCT(const int *input, uint8_t *output, const int *qt)
 {
 	const int *i;
 	uint8_t *o;
@@ -611,6 +609,8 @@ static void parse_dht(JPEGDecoder *j)
 		hts = in+17;
 		fb = 1;
 		c = 0;
+		s = 0;
+		f2 = ht;
 
 		while (htf < in+17)	{
 			tf = *htf++;

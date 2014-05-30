@@ -168,7 +168,12 @@ Image_Result Image_read_format_filename(
 {
 	FILE *input_file;
 	const char *error_string;
-	Image_Result image_result;
+	Image_Result image_result = IMAGE_RESULT_FAILURE;
+
+	if (!format) {
+		Image_log(image, IMAGE_LOGLEVEL_FATAL, "format not specified\n");
+		return image_result;
+	}
 
 	input_file = fopen(file_name, "rb");
 	if (!input_file) {
